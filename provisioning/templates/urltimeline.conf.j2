@@ -1,0 +1,21 @@
+server {
+	server_name {{ app_host }};
+	set $app_root {{ app_path }};
+
+	lua_socket_log_errors off;
+
+	auth_basic "Private Area";
+	auth_basic_user_file $app_root/nginx/htpasswd;
+
+	location ~ /s {
+		content_by_lua_file $app_root/nginx/urltimeline-server.lua;
+	}
+
+	location ~ / {
+		root $app_root/front;
+		index index.html index.htm;
+		expires max;
+		add_header Cache-Control public;
+		try_files $uri $uri/ =404;
+	}
+}

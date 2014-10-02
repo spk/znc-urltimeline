@@ -1,0 +1,41 @@
+---
+- hosts: webserver
+  sudo: yes
+  vars:
+    app_host: urltimeline.local
+  tasks:
+    - name: ensure packages list is at the latest version
+      apt: update_cache=yes cache_valid_time=3600
+
+    - apt: pkg={{ item }} state=present install_recommends=no
+      with_items:
+        - lua-nginx-websocket
+        - lua-nginx-redis
+        - redis-server
+        - znc
+        - znc-python
+
+    - template: src=templates/urltimeline.conf.j2 dest=/etc/nginx/sites-available/urltimeline.conf mode=0644 owner=root group=root
+      register: result
+
+    - file: src=/etc/nginx/sites-available/urltimeline.conf dest=/etc/nginx/sites-enabled/urltimeline.conf state=link
+
+    - name: restart nginx
+      command: /etc/init.d/nginx restart
+      when: result.changed
+
+    - copy: src={{app_path}}/znc/urltimeline.py dest=~/.znc/modules/urltimeline.py
+      register: result
+      sudo: false
+
+    - name: reload znc
+      action: command pkill --signal SIGHUP -f znc
+      when: result.changed
+      ignore_errors: true
+      register: znc_signal
+      sudo: false
+
+    - name: start znc
+      action: command znc
+      when: znc_signal|failed
+      sudo: false
