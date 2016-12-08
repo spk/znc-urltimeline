@@ -51,4 +51,4 @@ redis-cli rpush urltimeline-$ZNC_USER '{"timestamp":"2014-08-24T19:59:48.513890"
 
 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 
-Copyright (c) 2014 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
